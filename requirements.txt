@@ -1,0 +1,12 @@
+aiohttp~=3.13.5
+aiogram>=3.25.0
+kurigram==2.2.22
+pysocks~=1.7.1
+pillow~=12.1.0
+psutil~=7.2.2
+pymongo>=4.17.0
+pytgcrypto>=1.2.11
+py-tgcalls~=2.2.10
+py-yt-search~=0.6.2
+python-dotenv~=1.2.1
+yt-dlp[default]>=2026.03.17
