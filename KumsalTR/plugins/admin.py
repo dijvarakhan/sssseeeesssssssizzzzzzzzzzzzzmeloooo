@@ -37,56 +37,48 @@ async def cookies_status(_, m: types.Message):
 @app.on_message(filters.command(["cookie", "cerezkoy"]) & app.sudo_filter)
 @lang.language()
 async def update_cookie(_, m: types.Message):
-    """Yanıtlanan .txt dosyasını veya metni çerez olarak yükler"""
-    # Özel mesajda dosya veya metin gönderilirse de çalışsın
-    is_reply = m.reply_to_message is not None
-    target = m.reply_to_message if is_reply else m
-    
-    if target.document:
-        doc = target.document
-        if not doc.file_name or not doc.file_name.endswith(".txt"):
-            return await m.reply_text("<b>❌ Dᴏsʏᴀ .ᴛxᴛ ғᴏʀᴍᴀᴛɪɴᴅᴀ ᴏʟᴍᴀʟɪᴅɪʀ.</b>")
-        
-        sent = await m.reply_text("<b>🔄 Çᴇʀᴇᴢ ᴅᴏsʏᴀsɪ ɪşʟᴇɴɪʏᴏʀ...</b>")
-        try:
-            os.makedirs(yt.cookie_dir, exist_ok=True)
-            path = os.path.join(yt.cookie_dir, doc.file_name)
-            await target.download(file_name=path)
-            yt.normalize_cookie_file(path)
-            yt.checked = False
-            yt.cookies = []
-            yt.get_cookies()
-            count = len(yt.cookies)
-            await sent.edit_text(f"<b>✅ Çᴇʀᴇᴢ ʙᴀşᴀʀɪʏʟᴀ ʏᴜ̈ᴋʟᴇɴᴅɪ!</b>\n\n📂 <code>{path}</code>\n📊 Tᴏᴘʟᴀᴍ ᴀᴋᴛɪғ ᴄ̧ᴇʀᴇᴢ: {count}")
-        except Exception as e:
-            logger.error(f"Cookie upload error: {e}")
-            await sent.edit_text(f"<b>❌ Hᴀᴛᴀ: {e}</b>")
-            
-    elif target.text and (not is_reply or (is_reply and len(m.command) == 1)):
-        # Eğer komutun yanında metin varsa veya metne yanıt verilmişse
-        cookie_text = target.text if not is_reply else target.text
-        if "youtube.com" not in cookie_text and "FALSE" not in cookie_text:
-             if not is_reply: return await m.reply_text("<b>🍪 Lᴜ̈ᴛғᴇɴ ʙɪʀ .ᴛxᴛ ᴄ̧ᴇʀᴇᴢ (ᴄᴏᴏᴋɪᴇ) ᴅᴏsʏᴀsɪɴɪ ʏᴀɴɪᴛʟᴀʏᴀʀᴀᴋ <code>/cookie</code> ʏᴀᴢɪɴ ᴠᴇʏᴀ ᴄ̧ᴇʀᴇᴢ ᴍᴇᴛɴɪɴɪ ɢᴏ̈ɴᴅᴇʀɪɴ.</b>")
-        
-        sent = await m.reply_text("<b>🔄 Çᴇʀᴇᴢ ᴍᴇᴛɴɪ ɪşʟᴇɴɪʏᴏʀ...</b>")
-        try:
-            os.makedirs(yt.cookie_dir, exist_ok=True)
-            import time
-            path = os.path.join(yt.cookie_dir, f"cookie_{int(time.time())}.txt")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(cookie_text)
-            
-            yt.normalize_cookie_file(path)
-            yt.checked = False
-            yt.cookies = []
-            yt.get_cookies()
-            count = len(yt.cookies)
-            await sent.edit_text(f"<b>✅ Çᴇʀᴇᴢ ᴍᴇᴛɴɪ ʙᴀşᴀʀɪʏʟᴀ ʏᴜ̈ᴋʟᴇɴᴅɪ!</b>\n\n📂 <code>{path}</code>\n📊 Tᴏᴘʟᴀᴍ ᴀᴋᴛɪғ ᴄ̧ᴇʀᴇᴢ: {count}")
-        except Exception as e:
-            logger.error(f"Cookie text error: {e}")
-            await sent.edit_text(f"<b>❌ Hᴀᴛᴀ: {e}</b>")
+    """Yanıtlanan veya açıklamasında /cookie yazan .txt dosyasını çerez olarak yükler"""
+    reply = m.reply_to_message
+    if reply and reply.document:
+        target = reply
+    elif m.document:
+        target = m
     else:
-        await m.reply_text("<b>🍪 Lᴜ̈ᴛғᴇɴ ʙɪʀ .ᴛxᴛ ᴄ̧ᴇʀᴇᴢ (ᴄᴏᴏᴋɪᴇ) ᴅᴏsʏᴀsɪɴɪ ʏᴀɴɪᴛʟᴀʏᴀʀᴀᴋ <code>/cookie</code> ʏᴀᴢɪɴ ᴠᴇʏᴀ ᴄ̧ᴇʀᴇᴢ ᴍᴇᴛɴɪɴɪ ɢᴏ̈ɴᴅᴇʀɪɴ.</b>")
+        return await m.reply_text("<b>🍪 Lᴜ̈ᴛғᴇɴ ʙɪʀ .ᴛxᴛ ᴄ̧ᴇʀᴇᴢ (ᴄᴏᴏᴋɪᴇ) ᴅᴏsʏᴀsɪɴɪ ʏᴀɴɪᴛʟᴀʏᴀʀᴀᴋ ᴠᴇʏᴀ ᴅᴏsʏᴀ ᴀᴄ̧ɪᴋʟᴀᴍᴀsɪɴᴀ ʏᴀᴢᴀʀᴀᴋ <code>/cookie</code> ʏᴀᴢɪɴ.</b>")
+    
+    doc = target.document
+    if not doc.file_name or not doc.file_name.endswith(".txt"):
+        return await m.reply_text("<b>❌ Dᴏsʏᴀ .ᴛxᴛ ғᴏʀᴍᴀᴛɪɴᴅᴀ ᴏʟᴍᴀʟɪᴅɪʀ.</b>")
+    
+    sent = await m.reply_text("<b>🔄 Çᴇʀᴇᴢʟᴇʀ ɪşʟᴇɴɪʏᴏʀ...</b>")
+    
+    try:
+        os.makedirs(yt.cookie_dir, exist_ok=True)
+        path = os.path.join(yt.cookie_dir, doc.file_name)
+        
+        # Eğer dosya varsa sil ki temiz indirme olsun
+        if os.path.exists(path):
+            os.remove(path)
+            
+        await target.download(file_name=path)
+        
+        if not os.path.exists(path):
+            return await sent.edit_text("<b>❌ Dᴏsʏᴀ ɪɴᴅɪʀɪʟᴇᴍᴇᴅɪ.</b>")
+
+        # Formatı düzelt
+        yt.normalize_cookie_file(path)
+        
+        # YouTube core'u tetikle
+        yt.checked = False
+        yt.cookies = []
+        yt.get_cookies()
+        
+        count = len(yt.cookies)
+        await sent.edit_text(f"<b>✅ Çᴇʀᴇᴢ ʙᴀşᴀʀɪʏʟᴀ ʏᴜ̈ᴋʟᴇɴᴅɪ!</b>\n\n📂 <code>{path}</code>\n📊 Tᴏᴘʟᴀᴍ ᴀᴋᴛɪғ ᴄ̧ᴇʀᴇᴢ: {count}")
+        logger.info(f"New cookie uploaded: {path} (Total: {count})")
+    except Exception as e:
+        logger.error(f"Cookie upload error: {e}")
+        await sent.edit_text(f"<b>❌ Hᴀᴛᴀ: {e}</b>")
 
 
 @app.on_message(filters.command(["cookietemizle", "clearcookies"]) & app.sudo_filter)
@@ -121,4 +113,12 @@ async def clear_cache_cmd(_, m: types.Message):
         except:
             continue
     await m.reply_text(f"<b>🧹 {count} ᴀᴅᴇᴛ ᴏ̈ɴʙᴇʟʟᴇᴋ ᴅᴏsʏᴀsɪ ᴛᴇᴍɪᴢʟᴇɴᴅɪ.</b>")
+@app.on_message(filters.command("id"))
+async def id_check(_, m: types.Message):
+    """Kullanıcı ve sohbet ID'sini gösterir, sudo durumunu belirtir"""
+    is_sudo = m.from_user.id in app.sudoers if m.from_user else False
+    text = f"<b>👤 Kᴜʟʟᴀɴɪᴄɪ:</b> <code>{m.from_user.id if m.from_user else 'Bilinmiyor'}</code>\n"
+    text += f"<b>👥 Sᴏʜʙᴇᴛ:</b> <code>{m.chat.id}</code>\n"
+    text += f"<b>🛡️ Sᴜᴅᴏ:</b> {'✅ Evet' if is_sudo else '❌ Hayır'}"
+    await m.reply_text(text)
 
